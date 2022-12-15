@@ -45,53 +45,107 @@ vrag = [
 
 ]
 vrag_list = []
+vistrel = [
+    pygame.image.load('fire/1.png').convert_alpha(),
+    pygame.image.load('fire/2.png').convert_alpha(),
+    pygame.image.load('fire/3.png').convert_alpha(),
+    pygame.image.load('fire/4.png').convert_alpha(),
+    pygame.image.load('fire/5.png').convert_alpha(),
+    pygame.image.load('fire/6.png').convert_alpha(),
+    pygame.image.load('fire/7.png').convert_alpha(),
+    pygame.image.load('fire/8.png').convert_alpha()
+    ]
 player_anim_count = 0
 player_vrag_count = 0
+vistrel_anim_count = 0
+heart_count = 0
+heart_x = 10
+heart_y = 10
 bg_x = 0
 
 player_speed = 10
 player_x = 100
 player_y = 245
 player_live = 10
-
+zombi_rect_x = 801
+vistrel_x = player
 vrag_speed = 4
-vistrel = []
+zombi_count = 0
+
 labal_lose = pygame.font.Font('font/Old-Soviet.otf', 40)
 labal = labal_lose.render('Вы проиграли', False, (193, 196, 199))
-labal_life = labal_lose.render('Life {player_live}', False, (193, 196, 199))
+labal2 = labal_lose.render('Убито', False, (193, 196, 199))
+heart = [
+    pygame.image.load('images/heart/2.png').convert_alpha(),
+    pygame.image.load('images/heart/2.png').convert_alpha(),
+    pygame.image.load('images/heart/2.png').convert_alpha(),
+    pygame.image.load('images/heart/2.png').convert_alpha(),
+    pygame.image.load('images/heart/2.png').convert_alpha(),
+    pygame.image.load('images/heart/5.png').convert_alpha(),
+    pygame.image.load('images/heart/6.png').convert_alpha(),
+    pygame.image.load('images/heart/5.png').convert_alpha(),
+    pygame.image.load('images/heart/6.png').convert_alpha()
+]
 is_jump = False
 jump_count = 10
 
 bg_sound = pygame.mixer.Sound('sounds/bg.mp3')
-# bg_sound.play()
+bg_sound.play()
 vrag_timer = pygame.USEREVENT + 1
 new_for_vrag = 1000
 pygame.time.set_timer(vrag_timer, new_for_vrag)
 
-
+vistrel_fire = []
 running = True
 while running:
+    labal_life = labal_lose.render(str(player_live), False, (193, 196, 199))
+    zombi_count_print = labal_lose.render(str(zombi_count), False, (193, 196, 199))
     keys = pygame.key.get_pressed()
 
-    # screen.blit(labal_life, 10,10)
     screen.blit(bg, (bg_x, 0))
     screen.blit(bg, (bg_x + 800, 0))
     screen.blit(bg, (bg_x - 800, 0))
-    
+    screen.blit(labal_life, (80, 10))
+    screen.blit(heart[heart_count], (10, 10))
+    screen.blit(labal2, (500, 10))
+    screen.blit(zombi_count_print, (650, 10))
+
     player_rect = walk_left[0].get_rect(topleft=(player_x, player_y))
 
+     
     if vrag_list:
-        for el in vrag_list:
-            screen.blit(vrag[player_vrag_count], el)  
-            el.x -= 2
+        for zombi in vrag_list:
+            screen.blit(vrag[player_vrag_count], zombi)  
+            zombi.x -= vrag_speed
+            
 
-            if player_rect.colliderect(el):
+            if player_rect.colliderect(zombi):
                 player_live -= 1
                 player_x = 100
                 vrag_list.pop(0)
+            
 
     if player_live <= 0:
         screen.blit(labal, (180, 100))
+
+    if keys[pygame.K_e]:
+         vistrel_fire.append(vistrel[vistrel_anim_count].get_rect(topleft=(player_x + 30, player_y)))
+    
+    if vistrel_fire:
+        for fire in vistrel_fire:
+            screen.blit(vistrel[vistrel_anim_count], (fire.x, fire.y))
+            fire.x +=30
+
+        if vistrel_fire:
+            if vrag_list:
+                if fire.colliderect(zombi):
+                    zombi_count += 1
+                    vrag_speed += 2
+                    vistrel_fire.pop(0)
+                    vrag_list.pop(0)
+        if fire.x > 800:
+            vistrel_fire.pop(0)
+        
        
     if keys[pygame.K_a]:
         screen.blit(walk_left[player_anim_count], (player_x, player_y))
@@ -125,6 +179,11 @@ while running:
         player_x -= player_speed
     elif keys[pygame.K_d] and player_x < 750:
         player_x += player_speed
+    
+    elif heart_count == 8:
+        heart_count = 0
+    else:
+        heart_count += 1 
 
     if player_anim_count == 3:
         player_anim_count = 0
@@ -136,6 +195,11 @@ while running:
     else:
         player_vrag_count += 1
 
+    if vistrel_anim_count == 7:
+        vistrel_anim_count = 0
+    else:
+        vistrel_anim_count += 1
+    
     pygame.display.update()
 
     check = ri(0, 3)
@@ -146,7 +210,8 @@ while running:
             pygame.quit()
         if event.type == vrag_timer:
             if check == 2:
-                vrag_list.append(vrag[player_vrag_count].get_rect(topleft=(801, 230)))
+                vrag_list.append(vrag[player_vrag_count].get_rect(topleft=(zombi_rect_x, 230)))
+                zombi_rect_x -= 5
 
 
 
